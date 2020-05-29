@@ -5,6 +5,15 @@
 <i>Idea developed by </i>[Ipsita Hansdah](https://github.com/mikasacker).
 <i>Program designed by </i>[Sonaal Pradeep](https://github.com/sonaalPradeep).
 
+<hr>
+
+## Packages Pre-requisites
+The program is tested and runs on <b>python3.7.5</b>. The following packages are used in the program : argparse, tkinter, os and scapy. You might find the first three already installed by default. To install the required packages, run the following command on your terminal:
+```bash
+pip3 install -r requirements.txt
+```
+
+## How to run the Program
 
 
 
