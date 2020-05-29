@@ -13,14 +13,27 @@ def port_condition(packet, port = 20):
 		return False
 
 def convert_hex(string):
-	hex_letters = ['a', 'b', 'c', 'd', 'e', 'f', '0', 
-					'1', '2', '3', '4', '5', '6', '7', '8', '9']	
+	excp_letters = ['\\', 'r', 't', 'n']	
 
-#	string = "".join([hex(ord(letter)).lstrip('0x') 
-#						if letter not in hex_letters else letter for letter in string])
+	if len(string) == 2:
+		return string
 
-#	res_string = string[:2]
-#	app_string = "".join(hex(ord(letter)).lstrip('0x') for letter in string[2:])
+
+	res_string = string[:2]
+	string = "".join([hex(ord(letter)).lstrip('0x') 
+						if letter not in excp_letters else letter for letter in string[2:]])
+
+	string = res_string + string
+
+	string = re.sub(r'\\r', '0d', string)
+	string = re.sub(r'\\n', '0a', string)
+	string = re.sub(r'\\t', '09', string)
+	string = re.sub(r'\\\\', '5c', string)
+	string = re.sub(r'\\27', '27', string)
+
+	string = re.sub(r'n', hex(ord('n')).lstrip('0x'), string)
+	string = re.sub(r't', hex(ord('t')).lstrip('0x'), string)
+	string = re.sub(r'r', hex(ord('r')).lstrip('0x'), string)
 
 	return string
 
@@ -31,16 +44,14 @@ def extract_image(file_name, packet):
 
 	packet_data = [convert_hex(sub_str) for sub_str in packet_data]
 		
-#	packet_data = [re.sub(r'\\r', '0d', capstr) for capstr in packet_data]
-#	packet_data = [re.sub(r'\\n', '0a', capstr) for capstr in packet_data]
+	packet_data = "".join(packet_data)
+#	print(packet_data)
+	img_data = bytes.fromhex(str(packet_data))
 
-#	packet_data = [convert_hex(sub_str) for sub_str in packet_data]
-#	packet_data = "".join(packet_data)
+	with open(file_name, 'wb') as f:
+		f.write(img_data)
 
-#	with open(file_name, 'wb') as f:
-#		f.write(packet_data)
-
-	print(packet_data)
+#	print(packet_data)
 
 #	except:
 #		print('Unexpected Error')
@@ -90,7 +101,7 @@ if __name__ == '__main__':
 					if file_format == 'txt':
 						with open(file_name + '.' + file_format, 'a+') as f:
 							f.write('\n'.join(line.split(r'\n')))
-					elif file_format == 'jpg':
+					elif file_format == 'jpg' or file_format == 'jpeg' or file_format == 'png':
 						extract_image('.'.join([file_name, file_format]), packet_list[ind])
 				
 			except:
