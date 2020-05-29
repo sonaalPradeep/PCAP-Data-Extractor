@@ -14,12 +14,15 @@ pip3 install -r requirements.txt
 ```
 
 ## How to run the Program
-The program comes with a well documented help page. Run the following command to access the help page
+The program comes with a well documented help page. Run the following command to access the help page:
 ```bash
 python3 extr_ftp.py --help
 # or
 python3 extr_ftp.py -h
 ```
-
+To run the program, enter the following command:
+```bash
+python3 extr_ftp.py path/to/pcap/file
+```
 
 
