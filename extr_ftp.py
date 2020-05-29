@@ -1,3 +1,15 @@
+"""
+PCAP FILE EXTRACTOR
+
+A SIMPLE TO USE PYTHON PROGRAM TO EXTRACT DATA TRANSFERED VIA FTP FROM ITS PCAP FILES. 
+
+THE PROGRAM SUPPORTS EXTRACTING TXT, JPEG AND JPG FORMATS.
+
+IDEA OF IPSITA HANSDAH (https://github.com/mikasacker)
+PROGRAM DESIGNED BY SONAAL PRADEEP(https://github.com/sonaalPradeep)
+
+
+"""
 import argparse
 import tkinter 
 import re
@@ -18,7 +30,6 @@ def convert_hex(string):
 	if len(string) == 2:
 		return string
 
-
 	res_string = string[:2]
 	string = "".join([hex(ord(letter)).lstrip('0x') 
 						if letter not in excp_letters else letter for letter in string[2:]])
@@ -38,23 +49,21 @@ def convert_hex(string):
 	return string
 
 def extract_image(file_name, packet):
-#	try:
-	packet_data = str(packet['Raw'].load)[2:-1].split('\\x')
-	packet_data = [capstr for capstr in packet_data if capstr != ""]		
+	try:
+		packet_data = str(packet['Raw'].load)[2:-1].split('\\x')
+		packet_data = [capstr for capstr in packet_data if capstr != ""]		
 
-	packet_data = [convert_hex(sub_str) for sub_str in packet_data]
+		packet_data = [convert_hex(sub_str) for sub_str in packet_data]
 		
-	packet_data = "".join(packet_data)
-#	print(packet_data)
-	img_data = bytes.fromhex(str(packet_data))
+		packet_data = "".join(packet_data)
 
-	with open(file_name, 'wb') as f:
-		f.write(img_data)
+		img_data = bytes.fromhex(str(packet_data))
 
-#	print(packet_data)
+		with open(file_name, 'wb') as f:
+			f.write(img_data)
 
-#	except:
-#		print('Unexpected Error')
+	except:
+		print('Unexpected Error occured while extracting image')
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser("Extract data from PCAP files. Defaults to extracting from FTP packets")
