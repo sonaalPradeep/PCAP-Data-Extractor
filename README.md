@@ -8,14 +8,18 @@
 <hr>
 
 ## Packages Pre-requisites
-The program is tested and runs on <b>python3.7.5</b>. The following packages are used in the program : argparse, tkinter, os and scapy. You might find the first three already installed by default. To install the required packages, run the following command on your terminal:
+The program is tested and runs on <b>python3.7.5</b>. The following packages are used in the program : argparse, tkinter, os and scapy. You might find the first three already installed by default. To install the other required packages, run the following command on your terminal:
 ```bash
 pip3 install -r requirements.txt
 ```
 
 ## How to run the Program
-
-
+The program comes with a well documented help page. Run the following command to access the help page
+```bash
+python3 extr_ftp.py --help
+# or
+python3 extr_ftp.py -h
+```
 
 
 
