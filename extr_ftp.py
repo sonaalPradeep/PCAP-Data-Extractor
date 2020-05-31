@@ -105,8 +105,8 @@ if __name__ == '__main__':
 				elif file_format == 'jpg' or file_format == 'jpeg' or file_format == 'png':
 					extract_image('.'.join([file_name, file_format]), packet_list[ind])
 					
-					if(args.verbose):
-						print("Retrieving File : {}".format('.'.join([file_name, file_format])))
+				if(args.verbose):
+					print("Retrieving File : {}".format('.'.join([file_name, file_format])))
 				
 		except:
 			continue
