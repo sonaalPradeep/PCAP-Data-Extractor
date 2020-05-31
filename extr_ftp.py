@@ -68,6 +68,7 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser("Extract data from PCAP files. Defaults to extracting from FTP packets")
 	parser.add_argument("file", help = "PCAP file to load")
 	parser.add_argument("-s", "--save", action = 'store_true', help = "save raw data in file")
+	parser.add_argument("-v", "--verbose", action = 'store_true', help = "echos debugging details")
 	args = parser.parse_args()
 
 	packet_list = rdpcap(args.file)	
@@ -75,6 +76,8 @@ if __name__ == '__main__':
 
 	if args.save and ('raw.txt' in os.listdir()):
 		os.remove('raw.txt')
+		if(args.verbose):
+			print("Removed File : raw.txt")
 
 	for ind in range(len(packet_list)):
 		try:
@@ -101,7 +104,12 @@ if __name__ == '__main__':
 						f.write('\n'.join(line.split(r'\n')))
 				elif file_format == 'jpg' or file_format == 'jpeg' or file_format == 'png':
 					extract_image('.'.join([file_name, file_format]), packet_list[ind])
+					
+					if(args.verbose):
+						print("Retrieving File : {}".format('.'.join([file_name, file_format])))
 				
 		except:
 			continue
 
+	if args.save and args.verbose:
+		print("Written File : raw.txt")
