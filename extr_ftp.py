@@ -11,7 +11,6 @@ PROGRAM DESIGNED BY SONAAL PRADEEP(https://github.com/sonaalPradeep)
 
 """
 import argparse
-import tkinter 
 import re
 import os
 
@@ -68,51 +67,41 @@ def extract_image(file_name, packet):
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser("Extract data from PCAP files. Defaults to extracting from FTP packets")
 	parser.add_argument("file", help = "PCAP file to load")
-	parser.add_argument("-g", "--gui", action = 'store_true', help = "open in gui")
 	parser.add_argument("-s", "--save", action = 'store_true', help = "save raw data in file")
 	args = parser.parse_args()
 
-	if args.gui:
-		window = tkinter.Tk()
-		window.title("PCAP data extractor")
+	packet_list = rdpcap(args.file)	
+	file_name, file_format = "", ""
 
-		label = tkinter.Label(window, text = "GUI support is currently unavailable :(").pack()
+	if args.save and ('raw.txt' in os.listdir()):
+		os.remove('raw.txt')
 
-		window.geometry("350x200")
-		window.mainloop()
-
-	else:
-		packet_list = rdpcap(args.file)	
-		file_name, file_format = "", ""
-
-		if args.save and ('raw.txt' in os.listdir()):
-			os.remove('raw.txt')
-
-		for ind in range(len(packet_list)):
-			try:
-				line = str(packet_list[ind]['Raw'].load).lstrip("'b").rstrip("'")
-				if args.save:
-					with open('raw.txt', 'a+') as f:
-						f.write(line + '\n')
+	for ind in range(len(packet_list)):
+		try:
+			line = str(packet_list[ind]['Raw'].load).lstrip("'b").rstrip("'")
+			if args.save:
+				with open('raw.txt', 'a+') as f:
+					f.write(line + '\n')
 				
-				if line[:4] == 'RETR':
-					file_name, file_format = line.split()[-1].split('.')
-					file_format = file_format[:-4]
+			if line[:4] == 'RETR':
+				file_name, file_format = line.split()[-1].split('.')
+				file_format = file_format[:-4]
 
-					if file_name + '.' + file_format in os.listdir():
-						os.remove(file_name + '.' + file_format)
-					continue
-				elif line == r'226 Transfer complete.\r\n':
-					file_name, file_format = "", ""
-					continue
-
-				if file_name != "" and port_condition(packet_list[ind]):
-					if file_format == 'txt':
-						with open(file_name + '.' + file_format, 'a+') as f:
-							f.write('\n'.join(line.split(r'\n')))
-					elif file_format == 'jpg' or file_format == 'jpeg' or file_format == 'png':
-						extract_image('.'.join([file_name, file_format]), packet_list[ind])
-				
-			except:
+				if file_name + '.' + file_format in os.listdir():
+					os.remove(file_name + '.' + file_format)
 				continue
+
+			elif line == r'226 Transfer complete.\r\n':
+				file_name, file_format = "", ""
+				continue
+
+			if file_name != "" and port_condition(packet_list[ind]):
+				if file_format == 'txt':
+					with open(file_name + '.' + file_format, 'a+') as f:
+						f.write('\n'.join(line.split(r'\n')))
+				elif file_format == 'jpg' or file_format == 'jpeg' or file_format == 'png':
+					extract_image('.'.join([file_name, file_format]), packet_list[ind])
+				
+		except:
+			continue
 
