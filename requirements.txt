@@ -1,4 +1,6 @@
 scapy==2.4.3
 argparse
+colorama
+tqdm
 # re
 # os
