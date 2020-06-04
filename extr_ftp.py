@@ -7,8 +7,6 @@ THE PROGRAM SUPPORTS EXTRACTING TXT, JPEG AND JPG FORMATS.
 
 IDEA OF IPSITA HANSDAH (https://github.com/mikasacker)
 PROGRAM DESIGNED BY SONAAL PRADEEP(https://github.com/sonaalPradeep)
-
-
 """
 import argparse
 import re
@@ -83,6 +81,7 @@ if __name__ == '__main__':
 	parser.add_argument("-s", "--save", action = 'store_true', help = "save raw data in file")
 	parser.add_argument("-v", "--verbose", action = 'count', default = 0, help = "echos debugging details")
 	parser.add_argument("-b", "--bar", action = "store_true", help = "leave tqdm progress bar after execution")
+	parser.add_argument("--version", action = "version", version = "v1.0")
 	args = parser.parse_args()
 	
 	init(autoreset = True)
