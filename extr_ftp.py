@@ -16,6 +16,9 @@ import os
 
 from scapy.all import rdpcap
 
+from colorama import init, Fore
+from tqdm import tqdm
+
 def port_condition(packet, port = 20):
 	try:
 		return (packet['TCP'].sport == port
@@ -62,7 +65,7 @@ def extract_image(file_name, packet):
 			f.write(img_data)
 
 	except:
-		print('Unexpected Error occured while extracting image')
+		tqdm.write(Fore.RED + 'Unexpected Error occured while extracting image : {}'.format(file_name))
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser("Extract data from PCAP files. Defaults to extracting from FTP packets")
@@ -71,16 +74,18 @@ if __name__ == '__main__':
 	parser.add_argument("-v", "--verbose", action = 'store_true', help = "echos debugging details")
 	args = parser.parse_args()
 
+	init(autoreset = True)
+
 	packet_list = rdpcap(args.file)	
-#	file_name, file_format = "", ""
 	file_names = []
+	raw_stat = False
 
 	if args.save and ('raw.txt' in os.listdir()):
 		os.remove('raw.txt')
 		if(args.verbose):
-			print("Removed File : raw.txt")
+			tqdm.write("Removed File : " + Fore.GREEN + "raw.txt")
 
-	for ind in range(len(packet_list)):
+	for ind in tqdm(range(len(packet_list)), desc = "Looking at Packets", leave = False, unit = 'Packets'):
 		try:
 			line = str(packet_list[ind]['Raw'].load).lstrip("'b").rstrip("'")
 			if args.save:
@@ -109,10 +114,11 @@ if __name__ == '__main__':
 					extract_image(file_names[0][0], packet_list[ind])
 					
 				if(args.verbose):
-					print("Retrieving File : {}".format(file_names[0][0]))
-				
+					tqdm.write("Retrieving File : " + Fore.GREEN + "{}".format(file_names[0][0]))
+
+			if args.save and args.verbose and not raw_print_stat:
+				tqdm.write("Written File : " + Fore.GREEN + "raw.txt")
+				raw_print_stat = True
+
 		except:
 			continue
-
-	if args.save and args.verbose:
-		print("Written File : raw.txt")
