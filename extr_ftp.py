@@ -19,6 +19,16 @@ from scapy.all import rdpcap
 from colorama import init, Fore
 from tqdm import tqdm
 
+def print_info(args):
+	try:
+		print(Fore.YELLOW + "PCAP file : " + args.file)
+		print(Fore.YELLOW + 'Save raw file : ' + str(args.save))
+		print(Fore.YELLOW + "Leave progress bar : " + str(args.bar))
+		print(Fore.YELLOW + 'Verbosity Level : ' + str(args.verbose))
+		print()
+	except:
+		print(Fore.RED + "Unexpected Error while printing argument information")
+
 def port_condition(packet, port = 20):
 	try:
 		return (packet['TCP'].sport == port
@@ -68,28 +78,35 @@ def extract_image(file_name, packet):
 		tqdm.write(Fore.RED + 'Unexpected Error occured while extracting image : {}'.format(file_name))
 
 if __name__ == '__main__':
-	parser = argparse.ArgumentParser("Extract data from PCAP files. Defaults to extracting from FTP packets")
+	parser = argparse.ArgumentParser(description = "Extract data from PCAP files. Defaults to extracting from FTP packets")
 	parser.add_argument("file", help = "PCAP file to load")
 	parser.add_argument("-s", "--save", action = 'store_true', help = "save raw data in file")
-	parser.add_argument("-v", "--verbose", action = 'store_true', help = "echos debugging details")
+	parser.add_argument("-v", "--verbose", action = 'count', default = 0, help = "echos debugging details")
+	parser.add_argument("-b", "--bar", action = "store_true", help = "leave tqdm progress bar after execution")
 	args = parser.parse_args()
-
+	
 	init(autoreset = True)
+
+	if(args.verbose == 2):
+		print_info(args)
 
 	packet_list = rdpcap(args.file)	
 	file_names = []
-	raw_stat = False
+	raw_print_stat = False
 
-	if args.save and ('raw.txt' in os.listdir()):
-		os.remove('raw.txt')
+	raw_file_name = args.file.rstrip(".pcapng").rstrip(".pcap").split('/')[-1]
+	raw_file_name = "raw_" + raw_file_name + ".txt"
+
+	if args.save and (raw_file_name in os.listdir()):
+		os.remove(raw_file_name)
 		if(args.verbose):
-			tqdm.write("Removed File : " + Fore.GREEN + "raw.txt")
+			tqdm.write("Removed File : " + Fore.GREEN + raw_file_name)
 
-	for ind in tqdm(range(len(packet_list)), desc = "Looking at Packets", leave = False, unit = 'Packets'):
+	for ind in tqdm(range(len(packet_list)), desc = "Looking at Packets", leave = args.bar, unit = 'Packets'):
 		try:
 			line = str(packet_list[ind]['Raw'].load).lstrip("'b").rstrip("'")
 			if args.save:
-				with open('raw.txt', 'a+') as f:
+				with open(raw_file_name, 'a+') as f:
 					f.write(line + '\n')
 				
 			if line[:4] == 'RETR':
@@ -114,10 +131,10 @@ if __name__ == '__main__':
 					extract_image(file_names[0][0], packet_list[ind])
 					
 				if(args.verbose):
-					tqdm.write("Retrieving File : " + Fore.GREEN + "{}".format(file_names[0][0]))
+					tqdm.write("Extracted File : " + Fore.GREEN + "{}".format(file_names[0][0]))
 
 			if args.save and args.verbose and not raw_print_stat:
-				tqdm.write("Written File : " + Fore.GREEN + "raw.txt")
+				tqdm.write("Written File : " + Fore.GREEN + raw_file_name)
 				raw_print_stat = True
 
 		except:
