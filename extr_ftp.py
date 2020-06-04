@@ -72,7 +72,8 @@ if __name__ == '__main__':
 	args = parser.parse_args()
 
 	packet_list = rdpcap(args.file)	
-	file_name, file_format = "", ""
+#	file_name, file_format = "", ""
+	file_names = []
 
 	if args.save and ('raw.txt' in os.listdir()):
 		os.remove('raw.txt')
@@ -90,23 +91,25 @@ if __name__ == '__main__':
 				file_name, file_format = line.split()[-1].split('.')
 				file_format = file_format[:-4]
 
-				if file_name + '.' + file_format in os.listdir():
-					os.remove(file_name + '.' + file_format)
+				file_names.append([file_name + '.' + file_format, file_format])
+
+				if file_names[-1][0] in os.listdir():
+					os.remove(file_name[-1][0])
 				continue
 
 			elif line == r'226 Transfer complete.\r\n':
-				file_name, file_format = "", ""
+				file_names.pop(0)
 				continue
 
-			if file_name != "" and port_condition(packet_list[ind]):
-				if file_format == 'txt':
-					with open(file_name + '.' + file_format, 'a+') as f:
+			if file_names != [] and port_condition(packet_list[ind]):
+				if file_names[0][-1] == 'txt':
+					with open(file_names[0][0], 'a+') as f:
 						f.write('\n'.join(line.split(r'\n')))
-				elif file_format == 'jpg' or file_format == 'jpeg' or file_format == 'png':
-					extract_image('.'.join([file_name, file_format]), packet_list[ind])
+				elif file_names[0][-1] in ['jpg', 'jpeg', 'png']:
+					extract_image(file_names[0][0], packet_list[ind])
 					
 				if(args.verbose):
-					print("Retrieving File : {}".format('.'.join([file_name, file_format])))
+					print("Retrieving File : {}".format(file_names[0][0]))
 				
 		except:
 			continue
