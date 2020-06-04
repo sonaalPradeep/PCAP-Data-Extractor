@@ -8,9 +8,10 @@
 <hr>
 
 ## Packages Pre-requisites
-The program runs and is tested on <b>Linux using python3.7.5</b>. The following packages are used in the program : argparse, os and scapy. You might find the first three already installed by default. To install the other required packages, run the following command on your terminal:
+The program runs and is tested on <b>Linux using python3.7.5</b>. The following packages are used in the program : argparse, re, os and scapy. You might find the first three already installed by default. To install the other required packages, run the following command on your terminal:
 ```bash
 pip3 install -r requirements.txt
+# 'os' and 're' module isn't included in PyPi
 ```
 
 ## How to run the Program
