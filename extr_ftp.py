@@ -10,7 +10,9 @@ PROGRAM DESIGNED BY SONAAL PRADEEP(https://github.com/sonaalPradeep)
 """
 import argparse
 import re
+import sys
 import os
+import glob
 
 from scapy.all import rdpcap
 
@@ -78,12 +80,12 @@ def extract_image(file_name, packet):
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description = "Extract data from PCAP files. Defaults to extracting from FTP packets")
-	parser.add_argument("file", help = "PCAP file to load")
+	parser.add_argument("file", type = str, help = "PCAP file to load. To extract multiple files, send regex style format in quotes")
+	parser.add_argument("--version", action = "version", version = "v1.0")
 	parser.add_argument("--http", action = 'store_true', help = "extract from http files")
 	parser.add_argument("-s", "--save", action = 'store_true', help = "save raw data in file")
 	parser.add_argument("-v", "--verbose", action = 'count', default = 0, help = "echos debugging details")
 	parser.add_argument("-b", "--bar", action = "store_true", help = "leave tqdm progress bar after execution")
-	parser.add_argument("--version", action = "version", version = "v1.0")
 	args = parser.parse_args()
 	
 	init(autoreset = True)
@@ -96,52 +98,64 @@ if __name__ == '__main__':
 	else:
 		selected_port = 20
 
-	packet_list = rdpcap(args.file)	
-	file_names = []
-	raw_print_stat = False
+	list_of_files = glob.glob(args.file)
 
-	raw_file_name = args.file.rstrip(".pcapng").rstrip(".pcap").split('/')[-1]
-	raw_file_name = "raw_" + raw_file_name.split('.')[0] + ".txt"
+	if len(list_of_files) == 0:
+		print(Fore.RED + "No files with given name found")
+		sys.exit()
+		
 
-	if args.save and (raw_file_name in os.listdir()):
-		os.remove(raw_file_name)
-		if(args.verbose):
-			tqdm.write("Removed File : " + Fore.GREEN + raw_file_name)
+	for iter_file_name in list_of_files:
+		packet_list = rdpcap(iter_file_name)	
+		file_name_parts = []
+		raw_print_stat = False
 
-	for ind in tqdm(range(len(packet_list)), desc = "Iterating thru Packets", leave = args.bar, unit = 'packets'):
-		try:
-			line = str(packet_list[ind]['Raw'].load).lstrip("'b").rstrip("'")
-			if args.save:
-				with open(raw_file_name, 'a+') as f:
-					f.write(line + '\n')
-				
-			if line[:4] == 'RETR':
-				file_name, file_format = line.split()[-1].split('.')
-				file_format = file_format[:-4]
+		raw_file_name = iter_file_name.rstrip(".pcapng").rstrip(".pcap").split('/')[-1]
+		raw_file_name = "raw_" + raw_file_name.split('.')[0] + ".txt"
 
-				file_names.append([file_name + '.' + file_format, file_format])
+		if args.save and (raw_file_name in os.listdir()):
+			os.remove(raw_file_name)
+			if(args.verbose):
+				tqdm.write("Removed File : " + Fore.GREEN + raw_file_name)
 
-				if file_names[-1][0] in os.listdir():
-					os.remove(file_name[-1][0])
-				continue
-
-			elif line == r'226 Transfer complete.\r\n':
-				file_names.pop(0)
-				continue
-
-			if file_names != [] and port_condition(packet_list[ind], selected_port):
-				if file_names[0][-1] == 'txt':
-					with open(file_names[0][0], 'a+') as f:
-						f.write('\n'.join(line.split(r'\n')))
-				elif file_names[0][-1] in ['jpg', 'jpeg', 'png']:
-					extract_image(file_names[0][0], packet_list[ind])
+		for ind in tqdm(range(len(packet_list)), desc = "Iterating thru Packets", leave = args.bar, unit = 'packets'):
+			try:
+				line = str(packet_list[ind]['Raw'].load).lstrip("'b").rstrip("'")
+				if args.save:
+					with open(raw_file_name, 'a+') as f:
+						f.write(line + '\n')
 					
-				if(args.verbose):
-					tqdm.write("Extracted File : " + Fore.GREEN + "{}".format(file_names[0][0]))
+				if line[:4] == 'RETR':
+					file_name, file_format = line.split()[-1].split('.')
+					file_format = file_format[:-4]
 
-			if args.save and args.verbose and not raw_print_stat:
-				tqdm.write("Written File : " + Fore.GREEN + raw_file_name)
-				raw_print_stat = True
+					file_name_parts.append([file_name + '.' + file_format, file_format])
 
-		except:
-			continue
+					if file_name_parts[-1][0] in os.listdir():
+						os.remove(file_name[-1][0])
+					continue
+
+				elif line == r'226 Transfer complete.\r\n':
+					file_name_parts.pop(0)
+					continue
+
+				if file_name_parts != [] and port_condition(packet_list[ind], selected_port):
+					if file_name_parts[0][-1] == 'txt':
+						with open(file_name_parts[0][0], 'a+') as f:
+							f.write('\n'.join(line.split(r'\n')))
+					elif file_name_parts[0][-1] in ['jpg', 'jpeg', 'png']:
+						extract_image(file_name_parts[0][0], packet_list[ind])
+					
+					if(args.verbose):
+						tqdm.write("Extracted File : " + Fore.GREEN + "{}".format(file_name_parts[0][0]))
+
+				if args.save and args.verbose and not raw_print_stat:
+					tqdm.write("Written File : " + Fore.GREEN + raw_file_name)
+					raw_print_stat = True
+
+		
+
+			except:
+				continue
+
+		print()
