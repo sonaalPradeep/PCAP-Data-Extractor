@@ -78,6 +78,7 @@ def extract_image(file_name, packet):
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description = "Extract data from PCAP files. Defaults to extracting from FTP packets")
 	parser.add_argument("file", help = "PCAP file to load")
+	parser.add_argument("--http", action = 'store_true', help = "extract from http files")
 	parser.add_argument("-s", "--save", action = 'store_true', help = "save raw data in file")
 	parser.add_argument("-v", "--verbose", action = 'count', default = 0, help = "echos debugging details")
 	parser.add_argument("-b", "--bar", action = "store_true", help = "leave tqdm progress bar after execution")
@@ -88,6 +89,11 @@ if __name__ == '__main__':
 
 	if(args.verbose == 2):
 		print_info(args)
+
+	if args.http:
+		selected_port = 80
+	else:
+		selected_port = 20
 
 	packet_list = rdpcap(args.file)	
 	file_names = []
@@ -122,7 +128,7 @@ if __name__ == '__main__':
 				file_names.pop(0)
 				continue
 
-			if file_names != [] and port_condition(packet_list[ind]):
+			if file_names != [] and port_condition(packet_list[ind], selected_port):
 				if file_names[0][-1] == 'txt':
 					with open(file_names[0][0], 'a+') as f:
 						f.write('\n'.join(line.split(r'\n')))
