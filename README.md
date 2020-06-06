@@ -8,10 +8,10 @@
 <hr>
 
 ## Packages Pre-requisites
-The program runs and is tested on <b>Linux using python3.7.5</b>. The following packages are used in the program : re, os, argparse, scapy, tqdm and colorama. You might find the first three already installed by default. To install the other required packages, run the following command on your terminal:
+The program runs and is tested on <b>Linux using python3.7.5</b>. The following packages are used in the program : scapy, tqdm and colorama. You might find the first three already installed by default. To install the other required packages, run the following command on your terminal:
 ```bash
 pip3 install -r requirements.txt
-# 'os' and 're' module isn't included in PyPi
+# 'os', 're' and other commented modules aren't included in PyPi, or come as default
 ```
 
 ## How to run the Program
@@ -24,6 +24,8 @@ python3 extr_ftp.py -h
 To run the program, enter the following command:
 ```bash
 python3 extr_ftp.py path/to/pcap/file
+# or, to send regex style paths
+python3 extr_ftp.py "path/to/files/*"
 ```
 
 
