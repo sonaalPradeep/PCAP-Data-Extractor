@@ -94,7 +94,7 @@ if __name__ == '__main__':
 	raw_print_stat = False
 
 	raw_file_name = args.file.rstrip(".pcapng").rstrip(".pcap").split('/')[-1]
-	raw_file_name = "raw_" + raw_file_name + ".txt"
+	raw_file_name = "raw_" + raw_file_name.split('.')[0] + ".txt"
 
 	if args.save and (raw_file_name in os.listdir()):
 		os.remove(raw_file_name)
