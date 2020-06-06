@@ -23,6 +23,7 @@ def print_info(args):
 		print(Fore.YELLOW + 'Save raw file : ' + str(args.save))
 		print(Fore.YELLOW + "Leave progress bar : " + str(args.bar))
 		print(Fore.YELLOW + 'Verbosity Level : ' + str(args.verbose))
+		print(Fore.YELLOW + 'Extraction data type : ' + ("HTTP" if args.http else "FTP"))
 		print()
 	except:
 		print(Fore.RED + "Unexpected Error while printing argument information")
@@ -107,7 +108,7 @@ if __name__ == '__main__':
 		if(args.verbose):
 			tqdm.write("Removed File : " + Fore.GREEN + raw_file_name)
 
-	for ind in tqdm(range(len(packet_list)), desc = "Looking at Packets", leave = args.bar, unit = 'Packets'):
+	for ind in tqdm(range(len(packet_list)), desc = "Iterating thru Packets", leave = args.bar, unit = 'packets'):
 		try:
 			line = str(packet_list[ind]['Raw'].load).lstrip("'b").rstrip("'")
 			if args.save:
