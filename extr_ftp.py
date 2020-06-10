@@ -26,6 +26,7 @@ def print_info(args):
 		print(Fore.YELLOW + "Leave progress bar : " + str(args.bar))
 		print(Fore.YELLOW + 'Verbosity Level : ' + str(args.verbose))
 		print(Fore.YELLOW + 'Extraction data type : ' + ("HTTP" if args.http else "FTP"))
+
 		print()
 	except:
 		print(Fore.RED + "Unexpected Error while printing argument information")
@@ -86,6 +87,7 @@ if __name__ == '__main__':
 	parser.add_argument("-s", "--save", action = 'store_true', help = "save raw data in file")
 	parser.add_argument("-v", "--verbose", action = 'count', default = 0, help = "echos debugging details")
 	parser.add_argument("-b", "--bar", action = "store_true", help = "leave tqdm progress bar after execution")
+
 	args = parser.parse_args()
 	
 	init(autoreset = True)
@@ -104,7 +106,6 @@ if __name__ == '__main__':
 		print(Fore.RED + "No files with given name found")
 		sys.exit()
 		
-
 	for iter_file_name in list_of_files:
 		packet_list = rdpcap(iter_file_name)	
 		file_name_parts = []
@@ -118,6 +119,7 @@ if __name__ == '__main__':
 			if(args.verbose):
 				tqdm.write("Removed File : " + Fore.GREEN + raw_file_name)
 
+		
 		for ind in tqdm(range(len(packet_list)), desc = "Iterating thru Packets", leave = args.bar, unit = 'packets'):
 			try:
 				line = str(packet_list[ind]['Raw'].load).lstrip("'b").rstrip("'")
@@ -151,9 +153,7 @@ if __name__ == '__main__':
 
 				if args.save and args.verbose and not raw_print_stat:
 					tqdm.write("Written File : " + Fore.GREEN + raw_file_name)
-					raw_print_stat = True
-
-		
+					raw_print_stat = True		
 
 			except:
 				continue
