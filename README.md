@@ -8,7 +8,7 @@
 <hr>
 
 ## Packages Pre-requisites
-The program runs and is tested on <b>Linux using python3.7.5</b>. The following packages are used in the program : scapy, tqdm and colorama. You might find the first three already installed by default. To install the other required packages, run the following command on your terminal:
+The program runs and is tested on <b>Linux using python3.7.5</b>. The following packages are used in the program : scapy, tqdm and colorama. To install these packages, run the following command on your terminal:
 ```bash
 pip3 install -r requirements.txt
 # 'os', 're' and other commented modules aren't included in PyPi, or come as default
