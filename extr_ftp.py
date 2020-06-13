@@ -6,13 +6,15 @@ A SIMPLE TO USE PYTHON PROGRAM TO EXTRACT DATA TRANSFERED VIA FTP FROM ITS PCAP 
 THE PROGRAM SUPPORTS EXTRACTING TXT, JPEG AND JPG FORMATS.
 
 IDEA OF IPSITA HANSDAH (https://github.com/mikasacker)
-PROGRAM DESIGNED BY SONAAL PRADEEP(https://github.com/sonaalPradeep)
+PROGRAM DESIGNED BY SONAAL PRADEEP (https://github.com/sonaalPradeep)
 """
 import argparse
 import re
 import sys
 import os
 import glob
+
+import uuid
 
 from scapy.all import rdpcap
 
@@ -82,7 +84,7 @@ def extract_image(file_name, packet):
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description = "Extract data from PCAP files. Defaults to extracting from FTP packets")
 	parser.add_argument("file", type = str, help = "PCAP file to load. To extract multiple files, send regex style format in quotes")
-	parser.add_argument("--version", action = "version", version = "v1.0")
+	parser.add_argument("--version", action = "version", version = "v1.4")
 	parser.add_argument("--http", action = 'store_true', help = "extract from http files")
 	parser.add_argument("-s", "--save", action = 'store_true', help = "save raw data in file")
 	parser.add_argument("-v", "--verbose", action = 'count', default = 0, help = "echos debugging details")
@@ -101,6 +103,7 @@ if __name__ == '__main__':
 		selected_port = 20
 
 	list_of_files = glob.glob(args.file)
+	list_of_files.sort()
 
 	if len(list_of_files) == 0:
 		print(Fore.RED + "No files with given name found")
@@ -126,34 +129,50 @@ if __name__ == '__main__':
 				if args.save:
 					with open(raw_file_name, 'a+') as f:
 						f.write(line + '\n')
+
+				if args.http:
+					try:
+						raw_load = str(packet_list[ind]['Raw'].load)
+						res = re.findall(r"Content-Type: text/html", raw_load)
+						
+						h_file_name = uuid.uuid4().hex + '.txt'
+
+						if res:
+							with open(h_file_name, 'wb') as fd:
+								fd.write(packet_list[ind]['Raw'].load)
+
+							tqdm.write("Extracted File : " + Fore.GREEN + "{}".format(h_file_name))
+					except:
+						continue	
+							
+				else:
+					if line[:4] == 'RETR':
+						file_name, file_format = line.split()[-1].split('.')
+						file_format = file_format[:-4]
+
+						file_name_parts.append([file_name + '.' + file_format, file_format])
+
+						if file_name_parts[-1][0] in os.listdir():
+							os.remove(file_name[-1][0])
+						continue
+
+					elif line == r'226 Transfer complete.\r\n':
+						file_name_parts.pop(0)
+						continue
+
+					if file_name_parts != [] and port_condition(packet_list[ind], selected_port):
+						if file_name_parts[0][-1] == 'txt':
+							with open(file_name_parts[0][0], 'a+') as f:
+								f.write('\n'.join(line.split(r'\n')))
+						elif file_name_parts[0][-1] in ['jpg', 'jpeg', 'png']:
+							extract_image(file_name_parts[0][0], packet_list[ind])
 					
-				if line[:4] == 'RETR':
-					file_name, file_format = line.split()[-1].split('.')
-					file_format = file_format[:-4]
+						if(args.verbose):
+							tqdm.write("Extracted File : " + Fore.GREEN + "{}".format(file_name_parts[0][0]))
 
-					file_name_parts.append([file_name + '.' + file_format, file_format])
-
-					if file_name_parts[-1][0] in os.listdir():
-						os.remove(file_name[-1][0])
-					continue
-
-				elif line == r'226 Transfer complete.\r\n':
-					file_name_parts.pop(0)
-					continue
-
-				if file_name_parts != [] and port_condition(packet_list[ind], selected_port):
-					if file_name_parts[0][-1] == 'txt':
-						with open(file_name_parts[0][0], 'a+') as f:
-							f.write('\n'.join(line.split(r'\n')))
-					elif file_name_parts[0][-1] in ['jpg', 'jpeg', 'png']:
-						extract_image(file_name_parts[0][0], packet_list[ind])
-					
-					if(args.verbose):
-						tqdm.write("Extracted File : " + Fore.GREEN + "{}".format(file_name_parts[0][0]))
-
-				if args.save and args.verbose and not raw_print_stat:
-					tqdm.write("Written File : " + Fore.GREEN + raw_file_name)
-					raw_print_stat = True		
+					if args.save and args.verbose and not raw_print_stat:
+						tqdm.write("Written File : " + Fore.GREEN + raw_file_name)
+						raw_print_stat = True		
 
 			except:
 				continue
