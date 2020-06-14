@@ -29,4 +29,4 @@ python3 extr_ftp.py "path/to/files/*"
 ```
 
 ## Notes
-* The program supports extracting textual data from HTTP packets, <b>but this wouldn't be recommended as sometimes the entire content isn't extracted.</b>
+* The program supports extracting textual data from HTTP packets, <b>but this wouldn't be recommended as sometimes the entire content isn't extracted.</b> To extract HTTP content, use the <i>--html</i> argument.
