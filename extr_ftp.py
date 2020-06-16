@@ -113,8 +113,8 @@ if __name__ == '__main__':
 		print_info(args)
 
 	# By default, extract FTP packets, else extract from HTTP packets
-	selected_port = 20 if args.http else 80
-
+	selected_port = 80 if args.http else 20
+	print(selected_port)
 	# Provides for Linux style path input. Find names of all files and sort
 	list_of_files = glob.glob(args.file)
 	list_of_files.sort()
